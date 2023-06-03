@@ -41,13 +41,21 @@
 - stroke = 1: 3个样本
 
 因此，熵的计算方式为：
+
+
 $$
 Entropy = -p_0 \log_2{p_0} - p_1 \log_2{p_1}
 $$
+
+
 其中，p_0为stroke=0的样本比例，p_1为stroke=1的样本比例。代入上述数值，得到：
+
+
 $$
 Entropy = -\frac{7}{10} \log_2{\frac{7}{10}} - \frac{3}{10} \log_2{\frac{3}{10}} \approx 0.881
 $$
+
+
 因此，该数据集的熵约为0.881。
 
 **What is the information gain for Gender and Work Type attributes, relative to these training examples?**
