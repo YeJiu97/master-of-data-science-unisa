@@ -1,5 +1,9 @@
 # Week 7: Rule-based Classifier
 
+**Task 1**
+
+**Apply the RIPPER algorithm to find a set of all the classification rules for the dataset provided above. Please note that RIPPER algorithm learns rules starting from the minority class. In the practical folder (learnonline), you will find a RIPPER example on a different dataset (p7-ripper-sample.xlsx).**
+
 In this Practical we will learn how to produce a set of classification rules using the <font color="red">***\*RIPPER\****</font> algorithm.
 
 1. Understand the principles of the ***RIPPER*** algorithm. 
@@ -31,17 +35,20 @@ We will be using a sample dataset that can be found in other examples that intro
 |presbyopic | hypermetrope | yes | reduced | none |
 |presbyopic | hypermetrope | yes | normal  | none |
 
-Task 1: RIPPER algorithm
+**Task 2: Applying the rules**
 
-Apply the RIPPER algorithm to find a set of all the classification rules for the dataset provided above. Please note that RIPPER algorithm learns rules starting from the minority class. In the practical folder (learnonline), you will find a RIPPER example on a different dataset (p7-rippersample.xlsx)
+**Apply the rules the algorithm learned for the above dataset to make a prediction for the following tuples:**
 
-Task 2: Applying the rules
+**<A = “young”, SP = “hypermetrope”, AST = “no”, TP = “normal”, RL = ?>**
+**<A = “presbyopic”, SP = “myope”, AST = “yes”, TP = “normal”, RL = ?>**
+**<A = “presbyopic”, SP = “hypermetrope”, AST = “no”, TP = “reduced”, RL = ?>**
 
-Apply the rules the algorithm learned for the above dataset to make a prediction for the following tuples:
+**Where: * A – Age, * SP – Spectacle prescription, * AST – Astigmatism, TP – Tear production, and RL – Recommended lenses (CLASS). What are the predicted classes for the three tuples above? Feel free to share your results in the discussion forum.**
 
-<A = “young”, SP = “hypermetrope”, AST = “no”, TP = “normal”, RL = ?>
-<A = “presbyopic”, SP = “myope”, AST = “yes”, TP = “normal”, RL = ?>
-<A = “presbyopic”, SP = “hypermetrope”, AST = “no”, TP = “reduced”, RL = ?>
+What are the predicted classes for the three tuples above?
 
+Based on the provided dataset and applying the learned rules, here are the predicted classes for the three tuples:
 
-Where: * A – Age, * SP – Spectacle prescription, * AST – Astigmatism, TP – Tear production, and RL – Recommended lenses (CLASS). What are the predicted classes for the three tuples above? Feel free to share your results in the discussion forum.
+1. Tuple <A = "young", SP = "hypermetrope", AST = "no", TP = "normal", RL = ?> Predicted Class: Soft lenses
+2. Tuple <A = "presbyopic", SP = "myope", AST = "yes", TP = "normal", RL = ?> Predicted Class: None (No recommended lenses)
+3. Tuple <A = "presbyopic", SP = "hypermetrope", AST = "no", TP = "reduced", RL = ?> Predicted Class: None (No recommended lenses)
