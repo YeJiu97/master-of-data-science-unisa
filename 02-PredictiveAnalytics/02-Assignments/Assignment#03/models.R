@@ -81,6 +81,8 @@ evaluate_performance(naive_model_04, test_data)
 evaluate_performance(naive_model_05, test_data)
 evaluate_performance(naive_model_06, test_data)
 
+
+
 # Extract conditional probabilities from the model
 conditional_probs <- naive_model_01$tables
 
@@ -187,7 +189,7 @@ for (i in 1:length(models)) {
 
 # 打印过拟合测试结果
 print(overfitting_results)
-print(models[[3]])
+print(models[[2]])
 # plot(target ~ ., data = train_data, model = models[[3]])
 
 
@@ -307,5 +309,4 @@ for (i in 1:nrow(rf_parameters)) {
 
 # Print model performance results
 print(model_results)
-
 
