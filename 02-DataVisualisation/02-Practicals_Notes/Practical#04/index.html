@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>D3.js Visualization</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div id="chart"></div>
+
+  <script>
+    
+    d3.json("data.json").then(function(data) {
+      
+      var positions = data.map(function(d) {
+        return d.position;
+      });
+
+      var genders = data.map(function(d) {
+        return d.gender;
+      });
+
+      var salaries = data.map(function(d) {
+        return d.salary;
+      });
+
+      
+      var positionCounts = d3.rollup(data, v => v.length, d => d.position);
+
+      
+      var pieData = Array.from(positionCounts, ([position, count]) => ({ position, count }));
+      var width = 400;
+      var height = 400;
+      var radius = Math.min(width, height) / 2;
+      var colors = d3.scaleOrdinal(d3.schemeCategory10);
+      
+      var pie = d3.pie()
+        .value(function(d) { return d.count; })
+        .sort(null);
+      
+      var arc = d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius);
+      
+      var svg = d3.select("#chart")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+      
+      var path = svg.selectAll("path")
+        .data(pie(pieData))
+        .enter()
+        .append("path")
+        .attr("d", arc)
+        .attr("fill", function(d, i) {
+          return colors(i);
+        })
+        .attr("stroke", "white")
+        .style("stroke-width", "2px");
+      
+      
+      var labels = svg.selectAll("text")
+        .data(pie(pieData))
+        .enter()
+        .append("text")
+        .attr("transform", function(d) {
+          var centroid = arc.centroid(d);
+          return "translate(" + centroid[0] + "," + centroid[1] + ")";
+        })
+        .attr("text-anchor", "middle")
+        .text(function(d) {
+          return d.data.position;
+        })
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .style("fill", "white");
+
+      
+      var genderSalary = d3.rollup(data, v => d3.mean(v, d => d.salary), d => d.gender);
+
+      
+      var barData = Array.from(genderSalary, ([gender, avgSalary]) => ({ gender, avgSalary }));
+      var barWidth = 400;
+      var barHeight = 200;
+      var barMargin = { top: 20, right: 20, bottom: 30, left: 40 };
+
+      var xScale = d3.scaleBand()
+        .domain(genders)
+        .range([barMargin.left, barWidth - barMargin.right])
+        .padding(0.1);
+
+      var yScale = d3.scaleLinear()
+        .domain([0, d3.max(salaries)])
+        .range([barHeight - barMargin.bottom, barMargin.top]);
+
+      var barSvg = d3.select("#chart")
+        .append("svg")
+        .attr("width", barWidth)
+        .attr("height", barHeight);
+
+      barSvg.selectAll("rect")
+        .data(barData)
+        .enter()
+        .append("rect")
+        .attr("x", function(d) { return xScale(d.gender); })
+        .attr("y", function(d) { return yScale(d.avgSalary); })
+        .attr("width", xScale.bandwidth())
+        .attr("height", function(d) { return barHeight - barMargin.bottom - yScale(d.avgSalary); })
+        .attr("fill", function(d, i) { return colors(i); })
+        .on("mouseover", function(d) {
+          d3.select(this).attr("fill", "darkorange");
+        })
+        .on("mouseout", function(d, i) {
+          d3.select(this).attr("fill", colors(i));
+        });
+
+      
+      barSvg.selectAll("text")
+        .data(barData)
+        .enter()
+        .append("text")
+        .text(function(d) { return "$" + d.avgSalary.toFixed(2); })
+        .attr("x", function(d) { return xScale(d.gender) + xScale.bandwidth() / 2; })
+        .attr("y", function(d) { return yScale(d.avgSalary) - 5; })
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "black");
+
+      
+      barSvg.selectAll(".gender-label")
+        .data(barData)
+        .enter()
+        .append("text")
+        .text(function(d) { return d.gender; })
+        .attr("x", function(d) { return xScale(d.gender) + xScale.bandwidth() / 2; })
+        .attr("y", barHeight - barMargin.bottom + 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "black");
+
+    }).catch(function(error) {
+      console.log(error);
+    });
+  </script>
+</body>
+</html>

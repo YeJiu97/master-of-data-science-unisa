@@ -1,0 +1,122 @@
+[
+  {
+    "name": "John Smith",
+    "gender": "Male",
+    "position": "Software Engineering",
+    "salary": 70000
+  },
+  {
+    "name": "Emily Johnson",
+    "gender": "Female",
+    "position": "Web Development",
+    "salary": 65000
+  },
+  {
+    "name": "Michael Williams",
+    "gender": "Male",
+    "position": "Data Analyst",
+    "salary": 80000
+  },
+  {
+    "name": "Jessica Brown",
+    "gender": "Female",
+    "position": "IT Support Specialist",
+    "salary": 60000
+  },
+  {
+    "name": "David Miller",
+    "gender": "Male",
+    "position": "Software Engineering",
+    "salary": 70000
+  },
+  {
+    "name": "Sarah Davis",
+    "gender": "Female",
+    "position": "Web Development",
+    "salary": 65000
+  },
+  {
+    "name": "James Anderson",
+    "gender": "Male",
+    "position": "Data Analyst",
+    "salary": 80000
+  },
+  {
+    "name": "Jennifer Wilson",
+    "gender": "Female",
+    "position": "IT Support Specialist",
+    "salary": 60000
+  },
+  {
+    "name": "Robert Taylor",
+    "gender": "Male",
+    "position": "Software Engineering",
+    "salary": 70000
+  },
+  {
+    "name": "Linda Thomas",
+    "gender": "Female",
+    "position": "Web Development",
+    "salary": 65000
+  },
+  {
+    "name": "William Clark",
+    "gender": "Male",
+    "position": "Data Analyst",
+    "salary": 80000
+  },
+  {
+    "name": "Karen Rodriguez",
+    "gender": "Female",
+    "position": "IT Support Specialist",
+    "salary": 60000
+  },
+  {
+    "name": "Daniel Martinez",
+    "gender": "Male",
+    "position": "Software Engineering",
+    "salary": 70000
+  },
+  {
+    "name": "Michelle Lee",
+    "gender": "Female",
+    "position": "Web Development",
+    "salary": 65000
+  },
+  {
+    "name": "Joseph Hernandez",
+    "gender": "Male",
+    "position": "Data Analyst",
+    "salary": 80000
+  },
+  {
+    "name": "Samantha Young",
+    "gender": "Female",
+    "position": "IT Support Specialist",
+    "salary": 60000
+  },
+  {
+    "name": "Andrew King",
+    "gender": "Male",
+    "position": "Software Engineering",
+    "salary": 70000
+  },
+  {
+    "name": "Amanda Scott",
+    "gender": "Female",
+    "position": "Web Development",
+    "salary": 65000
+  },
+  {
+    "name": "Matthew Green",
+    "gender": "Male",
+    "position": "Data Analyst",
+    "salary": 80000
+  },
+  {
+    "name": "Stephanie Baker",
+    "gender": "Female",
+    "position": "IT Support Specialist",
+    "salary": 60000
+  }
+]
