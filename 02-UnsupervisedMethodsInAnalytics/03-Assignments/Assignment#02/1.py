@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 # Define the data set
-X = np.array([[2, 1], [2, 4], [3, 2], [5, 6], [6, 5], [7, 4], [8, 5], [10, 10]])
+X = np.array([[2, 1], [2, 4], [3, 2], [5, 6], [6, 5], [7, 4], [8, 5], [20, 20]])
 
 # Define the number of clusters and threshold value
 k = 2
