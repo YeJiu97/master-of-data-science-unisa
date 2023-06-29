@@ -1,4 +1,5 @@
 # packages
+library(corrplot)
 library(readr)
 library(ggplot2)
 library(dplyr)
@@ -7,7 +8,12 @@ library(tidyverse)
 library(mapdata)
 library(sf)
 library(treemapify)
+library(reshape2)
 library(scales)  # 加载scales包以使用数字格式
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(gplots)
 
 # 导入country_vaccinations.csv
 country_vaccinations <- read_csv("country_vaccinations.csv")
@@ -349,3 +355,65 @@ ggplot(latest_gdp_data, aes(x = gdp_per_capita, y = total_deaths_per_million)) +
   scale_size(range = c(1, 10), name = "Total Cases") +
   labs(x = "GDP per Capita", y = "total deaths per million", title = paste("The relationship between GDP per capita and total deaths per million", latest_gdp_date)) +
   theme_minimal()
+
+# ==============================================================
+# 选择与人口相关的指标和total_deaths
+population_vars <- c("population", "population_density", "median_age", "aged_65_older", "aged_70_older", 
+                     "gdp_per_capita", "extreme_poverty", "cardiovasc_death_rate", "diabetes_prevalence", "total_deaths")
+
+# 提取所选指标的数据
+population_data <- select(owid_covid_data, location, date, all_of(population_vars))
+
+# 处理缺失值：删除包含缺失值的行
+population_data <- na.omit(population_data)
+
+# 计算相关系数矩阵
+cor_matrix <- cor(population_data[, population_vars])
+
+# 将相关系数矩阵转换为长格式数据框
+cor_data <- melt(cor_matrix)
+
+# 绘制热力图
+ggplot(data = cor_data, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 3) +  # 显示相关系数的数字
+  scale_fill_gradient(low = "yellow", high = "red") +
+  labs(title = "Correlation Heatmap: Population Indicators vs. Total Deaths",
+       x = "Variables",
+       y = "Variables",
+       fill = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# ================================================================
+# 选择与医疗资源相关的指标和total_deaths
+healthcare_vars <- c("icu_patients", "icu_patients_per_million", "hosp_patients", "hosp_patients_per_million",
+                     "weekly_icu_admissions", "weekly_icu_admissions_per_million", "weekly_hosp_admissions",
+                     "weekly_hosp_admissions_per_million", "hospital_beds_per_thousand", "total_deaths")
+
+# 提取所选指标的数据
+healthcare_data <- select(owid_covid_data, location, date, all_of(healthcare_vars))
+
+# 处理缺失值：删除包含缺失值的行
+healthcare_data <- na.omit(healthcare_data)
+
+# 计算相关系数矩阵
+cor_matrix <- cor(healthcare_data[, healthcare_vars])
+
+# 将相关系数矩阵转换为长格式数据框
+cor_data <- melt(cor_matrix)
+
+# 绘制热力图
+ggplot(data = cor_data, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 3) +  # 显示相关系数的数字
+  scale_fill_gradient(low = "yellow", high = "red") +
+  labs(title = "Correlation Heatmap: Healthcare Indicators vs. Total Deaths",
+       x = "Variables",
+       y = "Variables",
+       fill = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+cor_data
