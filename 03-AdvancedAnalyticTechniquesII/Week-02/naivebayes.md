@@ -86,7 +86,7 @@ $$ P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)} $$
 
 图示：
 
-![image-20230731113221770](naivebayes/image-20230731113221770.png)
+![image-20230731113221770](naivebayes/image-20230731113221770-1691217347164-27.png)
 
 **补充：后验概率。**
 
@@ -114,11 +114,11 @@ $$ P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)} $$
 
 **判别式分类器（discriminative model）：**
 
-![image-20230731113506205](naivebayes/image-20230731113506205.png)
+![image-20230731113506205](naivebayes/image-20230731113506205-1691217347165-28.png)
 
 **生成式分类器（Generative Model）：**
 
-![image-20230731113607209](naivebayes/image-20230731113607209.png)
+![image-20230731113607209](naivebayes/image-20230731113607209-1691217347165-29.png)
 
 ### MAP（Maximum A Posteriori）分类规则
 
@@ -225,7 +225,7 @@ print("观测数据 x 被分类为:", result)
 
 课件中的公式：
 
-![image-20230731114632947](naivebayes/image-20230731114632947.png)
+![image-20230731114632947](naivebayes/image-20230731114632947-1691217347165-30.png)
 
 在模式识别和分类问题中，通常使用 c* 和 c 来表示不同的类别。
 
@@ -237,7 +237,7 @@ print("观测数据 x 被分类为:", result)
 
 使用MAP RULE的生成式分类器：
 
-![image-20230731114743209](naivebayes/image-20230731114743209.png)
+![image-20230731114743209](naivebayes/image-20230731114743209-1691217347165-31.png)
 
 这是用于生成式分类的MAP（Maximum A Posteriori）分类规则的表达式。在这个公式中，我们希望计算在给定观测数据 𝐗=𝐱 的条件下，事件属于每个类别 $𝑐_𝑖$ 的后验概率。
 
@@ -254,6 +254,95 @@ print("观测数据 x 被分类为:", result)
 由于在分类问题中，观测数据的边缘概率对于所有类别是相同的，因此在上述公式中可以省略边缘概率的计算，而直接比较各类别的似然概率和先验概率乘积的大小，从而得到后验概率的相对大小，然后进行分类决策。
 
 ### 朴素贝叶斯 Naive Bayes
+
+贝叶斯：
+
+![image-20230731201049365](naivebayes/image-20230731201049365-1691217347165-32.png)
+
+思路：
+
+![image-20230731201253316](naivebayes/image-20230731201253316-1691217347166-33.png)
+
+假设Y有0和1两个取值，那么计算出$X=(x_1, x_2, ..., x_n)$的情况之下，Y=0和Y=1的概率，然后将其分配到概率值更高的Y的类别中。
+
+假设有数据集如下所示：
+
+![image-20230731192744584](naivebayes/image-20230731192744584-1691217347166-34.png)
+
+现在有一个新的数据，X=(0, 2)，要求找到正确的Y的标签。
+
+那么按照之前的逻辑，就是计算 $P(Y=0|X = (0, 2))$  和 $P(Y=1|X=(0,2))$的概率，然后比较大小，最终将这个新的数据分配到概率较大的类别中。
+
+首先进行计算：
+
+![image-20230731194218933](naivebayes/image-20230731194218933-1691217347166-35.png)
+
+因为分母都是$P(X=(0, 2))$，所以分母对于最终的概率大小不存在着影响。如此只需要计算$P(X=(0,2) | Y = 0 或 Y = 1)$ 和 $P(Y=0 或 Y = 1)$的乘积就可以了。最终这个数据被分配到$Y=1$这个类别中。
+
+**为什么采用朴素贝叶斯？**因为我们需要在数据集中找到X=(0,2)的特定组合，在存在着多个特征和大量的数据的情况之下，这是极其繁琐和困难的事情。比如说如果有十个特征，每个特征有三种可能性，那么排列的总数为：
+$$
+\text{总的排列组合数} = 3^{10} = 59,049
+$$
+
+因此，在这种情况下，一共有59,049种排列组合方式。
+
+如果使用朴素贝叶斯，那么可以直接将X1和X2视作是独立的变量，计算公式就可以简化为：
+
+![image-20230731201311687](naivebayes/image-20230731201311687-1691217347166-36.png)
+
+因为独立的两个变量的概率是可以直接相乘的。
+
+简单的计算可得：
+
+![image-20230731201700558](naivebayes/image-20230731201700558-1691217347166-37.png)
+
+推导如下所示：
+
+在概率论中，当两个事件A和B是独立事件时，它们的联合概率等于各自的概率的乘积。这就是独立事件的定义。
+
+如果事件A和事件B是独立的，那么有：
+
+$$P(A \cap B) = P(A) \cdot P(B)$$
+
+其中，
+
+- $P(A \cap B)$ 表示事件A和事件B同时发生的概率，即它们的交集的概率。
+- $P(A)$ 表示事件A发生的概率。
+- $P(B)$ 表示事件B发生的概率。
+
+当事件A和事件B是独立的，我们有以下定义和性质：
+
+1. 定义：两个事件A和B是独立的，当且仅当满足以下条件之一：
+   - $P(A \mid B) = P(A)$，表示在已知事件B发生的条件下，事件A发生的概率与事件A发生的概率相等；
+   - $P(B \mid A) = P(B)$，表示在已知事件A发生的条件下，事件B发生的概率与事件B发生的概率相等。
+
+2. 性质：如果事件A和事件B是独立的，则有 $P(A \cap B) = P(A) \cdot P(B)$。
+
+证明：
+
+根据独立事件的定义，我们知道：
+
+$$P(A \mid B) = P(A)$$
+
+根据条件概率的定义，我们有：
+
+$$P(A \mid B) = \frac{P(A \cap B)}{P(B)}$$
+
+将这两个等式结合起来，我们有：
+
+$$P(A) = \frac{P(A \cap B)}{P(B)}$$
+
+然后，我们可以通过移项，得到：
+
+$$P(A \cap B) = P(A) \cdot P(B)$$
+
+这就完成了对于 $P(A \cap B) = P(A) \cdot P(B)$ 的证明。
+
+因此，当事件A和事件B是独立的时候，它们的联合概率等于各自的概率的乘积。这是独立事件的一个重要性质。
+
+当事件A和事件B是独立事件时，它们的发生不会相互影响。这意味着在给定另一个事件的发生情况下，A和B仍然是独立的。因此，事件A和事件B同时发生的概率就等于它们各自发生的概率的乘积。
+
+请注意，当事件A和事件B不是独立事件时，它们的联合概率通常不等于各自概率的乘积，而需要使用条件概率来计算。
 
 **朴素贝叶斯（Naive Bayes）** 是一种简单且高效的概率分类算法，常用于文本分类和垃圾邮件过滤等任务。它基于贝叶斯定理和“朴素”假设，即认为特征之间是条件独立的。
 
@@ -289,11 +378,11 @@ $$ P(X|C) = P(X1|C) \cdot P(X2|C) \cdot ... \cdot P(Xn|C) $$
 例如，如果一封邮件中出现了单词“折扣”、“免费”和“优惠”，我们可以计算这封邮件在“垃圾邮件”类别和“非垃圾邮件”类别下的似然概率，并使用贝叶斯定理来计算后验概率，从而将这封邮件分类为“垃圾邮件”或“非垃圾邮件”。
 
 课件中的公式，**假设所有输入特征都是条件独立的：**
-
-$$ P(X_1, X_2, ..., X_n | C) = P(X_1 | X_2, ..., X_n, C) \cdot P(X_2, ..., X_n | C) $$
-$$ = P(X_1 | C) \cdot P(X_2, ..., X_n | C) $$
-$$ = P(X_1 | C) \cdot P(X_2 | C) \cdot ... \cdot P(X_n | C) $$
-
+$$
+P(X_1, X_2, ..., X_n | C) = P(X_1 | X_2, ..., X_n, C) \cdot P(X_2, ..., X_n | C) \\
+= P(X_1 | C) \cdot P(X_2, ..., X_n | C) \\
+= P(X_1 | C) \cdot P(X_2 | C) \cdot ... \cdot P(X_n | C)
+$$
 这个公式是根据条件概率的定义，利用概率的链式法则来推导。它表示在给定类别标签 C 的条件下，多个特征变量 X1, X2, ..., Xn 同时发生的概率可以分解为各个特征变量在给定类别标签 C 的条件下的概率的乘积。在朴素贝叶斯分类中，我们使用这个条件独立性假设，将多个特征变量之间的联合概率分解为各个特征变量在给定类别标签 C 的条件下的概率的乘积，从而简化了计算。
 
 **更加具体的解释**：
@@ -341,50 +430,57 @@ Naïve Bayes 算法因其简单、高效且在许多实际问题中表现良好�
 **Python语言实现**
 
 ```python
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.feature_extraction.text import CountVectorizer
+
+def train_naive_bayes_classifier(train_data, train_labels):
+    # 创建特征提取器，将文本转换为特征向量
+    vectorizer = CountVectorizer()
+    X_train = vectorizer.fit_transform(train_data)
+
+    # 创建朴素贝叶斯分类器并进行训练
+    nb_classifier = MultinomialNB()
+    nb_classifier.fit(X_train, train_labels)
+
+    return nb_classifier, vectorizer
+
+def predict_naive_bayes_classifier(classifier, vectorizer, test_data):
+    # 将测试数据转换为特征向量
+    X_test = vectorizer.transform(test_data)
+
+    # 进行预测
+    predicted_labels = classifier.predict(X_test)
+
+    return predicted_labels
 
 # 示例数据
-data = {
-    'text': ['this is a positive example', 'good job!', 'negative feedback', 'not good'],
-    'label': [1, 1, 0, 0]  # 1表示正面类别，0表示负面类别
-}
+train_data = ["This is a positive review.",
+              "I really enjoyed this movie.",
+              "The acting was superb!",
+              "Terrible movie, do not watch it.",
+              "Waste of time and money."]
 
-# 创建数据集
-X = data['text']  # 特征变量，即文本内容
-y = data['label']  # 类别标签
+train_labels = ["positive", "positive", "positive", "negative", "negative"]
 
-# 将文本转换为特征向量
-vectorizer = CountVectorizer()
-X_vectorized = vectorizer.fit_transform(X)
+test_data = ["I loved the movie, it was fantastic!",
+             "Avoid this movie, it's awful."]
 
-# 划分训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(X_vectorized, y, test_size=0.3, random_state=42)
+# 训练朴素贝叶斯分类器
+nb_classifier, vectorizer = train_naive_bayes_classifier(train_data, train_labels)
 
-# 创建朴素贝叶斯分类器
-classifier = MultinomialNB()
+# 进行预测
+predicted_labels = predict_naive_bayes_classifier(nb_classifier, vectorizer, test_data)
 
-# 在训练集上训练分类器
-classifier.fit(X_train, y_train)
-
-# 在测试集上进行预测
-y_pred = classifier.predict(X_test)
-
-# 计算准确率
-accuracy = accuracy_score(y_test, y_pred)
-print("准确率：", accuracy)
+# 输出预测结果
+print(predicted_labels)  # 输出: ['positive' 'negative']
 
 ```
 
-在上述代码中，我们使用了一个简单的文本分类数据集，其中有四个样本，每个样本包含一个文本内容和对应的类别标签。我们将这些文本内容转换为特征向量，使用`CountVectorizer`将文本转换为词频向量。
+得到的结果为：
 
-然后，我们将数据集划分为训练集和测试集，并使用`MultinomialNB`类创建了一个朴素贝叶斯分类器。在训练集上训练分类器后，我们使用分类器在测试集上进行预测，并计算了分类器的准确率。
-
-运行结果将显示分类器在测试集上的准确率。该准确率表示分类器正确分类的比例，越接近1表示分类器的性能越好。
-
-这个示例展示了如何使用朴素贝叶斯分类器进行简单的文本分类任务。在实际应用中，我们可以使用更大规模的数据集和更复杂的特征工程来改进分类器的性能。
+```python
+['positive' 'positive']
+```
 
 ### 优缺点
 
@@ -420,3 +516,4 @@ print("准确率：", accuracy)
 - 忽略特征之间的相关性：例如，对于文本分类问题，一些词汇可能有强相关性（如“good”和“excellent”），而朴素贝叶斯算法忽略了这些相关性。
 - 处理连续特征困难：如果文本分类问题中需要考虑词汇的频率等连续值特征，朴素贝叶斯算法需要进行离散化处理，可能会引入信息损失。
 - 对数据分布的假设：如果文本分类问题中不同类别的邮件之间有交叉词汇，朴素贝叶斯的条件独立性假设可能导致性能下降。
+
