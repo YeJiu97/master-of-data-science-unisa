@@ -482,6 +482,72 @@ print(predicted_labels)  # 输出: ['positive' 'negative']
 ['positive' 'positive']
 ```
 
+### 朴素贝叶斯模型对新数据进行分类	
+
+使用朴素贝叶斯模型对新数据进行预测涉及以下步骤：
+
+1. 对每个类别，计算其先验概率。
+2. 对于每个类别，乘以每个特征在该类别下的条件概率。
+3. 找到具有最高概率的类别。
+
+让我们通过一个具体的例子来说明。考虑以下简化的情境：
+
+**数据集**:
+
+```
+Feature_1  Feature_2  Class
+   A          X        1
+   A          Y        1
+   B          X        2
+   B          Y        2
+```
+
+基于此训练数据，假设我们已经得到以下模型参数：
+
+**先验概率**:
+
+$P(Class=1) = 0.5$
+
+$P(Class=2) = 0.5$
+
+**条件概率**:
+
+$P(Feature_1=A|Class=1) = 1.0$
+
+$P(Feature_1=B|Class=1) = 0.0$
+
+$P(Feature_1=A|Class=2) = 0.0$
+
+$P(Feature_1=B|Class=2) = 1.0$
+
+$P(Feature_2=X|Class=1) = 0.5$
+
+$P(Feature_2=Y|Class=1) = 0.5$
+
+$P(Feature_2=X|Class=2) = 0.5$
+
+$P(Feature_2=Y|Class=2) = 0.5$
+
+现在，考虑一个新的数据点：$Feature_1 = A$和 $Feature_2 = X$
+
+**预测过程**:
+
+为Class=1:
+
+$P(Class=1|Data) \propto P(Class=1) \times P(Feature_1=A|Class=1) \times P(Feature_2=X|Class=1)$
+
+$ = 0.5 \times 1.0 \times 0.5 = 0.25$
+
+为Class=2:
+
+$P(Class=2|Data) \propto P(Class=2) \times P(Feature_1=A|Class=2) \times P(Feature_2=X|Class=2)$
+
+$= 0.5 \times 0.0 \times 0.5 = 0.0$
+
+因此，对于新的数据点，我们预测其类别为1，因为它具有较高的概率值。
+
+需要注意的是，我们没有考虑分母（边际概率）的计算，因为我们只是对概率进行比较来进行分类，而不是真正地计算后验概率的值。
+
 ### 优缺点
 
 **朴素贝叶斯的优点**：

@@ -1,0 +1,111 @@
+---
+title: "wangjun's project result"
+author: "wangjun"
+date: "2023-09-15"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Data Preprocessing
+
+Import the data set and confirm whether the import is successful:
+
+```{r}
+# import data set
+data <- read.csv("BRCA_RNASeqv2_top50.csv")
+
+# check the first 6 rows
+head(data)
+
+```
+
+It can be found that the data has been successfully imported.
+
+check whether there is missing values or not:
+```{r}
+# View the number of missing values in each column
+missing_values_per_column <- sapply(data, function(x) sum(is.na(x)))
+
+# Output the number of missing values in each column
+missing_values_per_column
+```
+
+Judging from the results, there is no missing data in the data set, so there is no need to perform any processing on missing values.
+
+```{r}
+summary(data)
+```
+
+
+
+## Question 1
+
+```{r}
+
+library(pcalg)
+
+data_no_class <- data[, !names(data) %in% "class"]
+
+suffStat <- list(C = cor(data_no_class), n = nrow(data_no_class))
+pc.fit <- pc(suffStat, indepTest = gaussCItest, alpha = 0.1, labels = colnames(data_no_class))
+
+```
+
+
+
+```{r}
+
+library(qgraph)
+
+qgraph(pc.fit@graph,  title = "Gene Regulatory Network")
+
+```
+
+## Question 2
+
+```{R}
+
+# 获取EBF1的邻居
+adjMatrix <- as(pc.fit, "amat")
+ebf1_index <- which(colnames(data_no_class) == "EBF1")
+
+# ebf1_index_row <- which(rownames(data_no_class_standardized) == "EBF1")
+
+ebf1_neighbors <- which(adjMatrix[ebf1_index, ] != 0)
+
+# 如果ebf1_neighbors的长度小于10，打印出警告信息
+if(length(ebf1_neighbors) < 10){
+  cat("Warning: There are fewer than 10 genes directly connected to EBF1 in the causal graph.\n")
+}
+
+# 计算因果效应的绝对值
+causal_effects <- abs(cor(data_no_class)[ebf1_neighbors, "EBF1"])
+
+# 获取因果效应的基因名
+genes_with_effects <- rownames(cor(data_no_class)[ebf1_neighbors, ])
+
+# 将基因名与其对应的效应合并成数据框
+effects_df <- data.frame(Genes = genes_with_effects, Effects = causal_effects)
+
+# 对因果效应排序并获取前10名
+top_genes <- head(effects_df[order(-effects_df$Effects),], 10)
+
+top_genes
+```
+
+
+```{R}
+ida("EBF1", c("NPR1","KCNIP2"), cov(data_no_class) , pc.fit@graph)
+
+# idaFast(4, c(10,6), cov(d.mat) , pc.fit@graph)
+```
+
+
+
