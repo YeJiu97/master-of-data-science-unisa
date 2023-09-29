@@ -455,11 +455,13 @@ Then we choose additive rather than multiplicative:
 Here are the results of the two models and some comparisons between them:
 
 **Multiplicative Model**:
+
 - The fitted trend equation is Yt = 101.15 - 0.518×t, where t is time.
 - Seasonal Indices show that seasonal components affect the data in different proportions in different seasons. The index values are 0.91446, 0.81150, 0.87125 and 1.40279 respectively.
 - Accuracy measures include MAPE (Mean Absolute Percent Error) of 4.3328, MAD (Mean Absolute Dispersion) of 4.0212, and MSD (Mean Squared Difference) of 24.9849.
 
 **Additive Model**:
+
 - The fitted trend equation is Yt = 101.33 - 0.560×t, where t is time.
 - The seasonality index shows that the seasonal component affects the data with relatively small additive values, with index values of -8.0625, -17.6875, -12.4375, and 38.1875, respectively.
 - Accuracy measures include MAPE of 4.5176, MAD of 4.1584, and MSD of 26.7118.
@@ -504,6 +506,7 @@ In summary, the main difference between multivariate and additive models is how 
 In the multiplicative model, the specific values of the seasonal index are as follows:
 
 seasonal index
+
 Period 1 Index: 0.91446
 Period 2 Index: 0.81150
 Period 3 Index: 0.87125
@@ -515,7 +518,7 @@ In multiple models, each seasonality index represents the relative influence of 
 
 Specifically, the purpose of the multiplication operation is to remove the seasonal component from the raw data in order to better analyze the trend and other components of the data. Therefore, by multiplying the raw data with a seasonal index, you get data that can be viewed as data that is not affected by seasonality within the corresponding seasonal cycle.
 
-This seasonally adjusted data can be used to analyze and forecast trends more accurately because it has removed the seasonal component. This helps to better understand the overall behavior of time series data.
+This seasonally adjusted data can be used to analyze and forecast trends more accurately because it has removed the seasonal component. This helps to better understand the overall behaviour of time series data.
 
 ### Red Wine
 
