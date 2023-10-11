@@ -256,11 +256,13 @@ $ r = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})^2 \s
 考虑以下两组数据：
 
 $ x: [1, 2, 3, 4, 5] $
+
 $ y: [2, 3, 4, 5, 6] $
 
 首先，计算均值：
 
 $ \bar{x} = \frac{1+2+3+4+5}{5} = 3 $
+
 $ \bar{y} = \frac{2+3+4+5+6}{5} = 4 $
 
 使用上述公式，我们可以计算r：
@@ -270,6 +272,7 @@ $ r = \frac{\sum (x_i - 3)(y_i - 4)}{\sqrt{\sum (x_i - 3)^2 \sum (y_i - 4)^2}} $
 当你对每个$ x_i $和$ y_i $进行计算并插入到公式中，你会得到：
 
 $ r = 1 $
+
 这表示x和y之间有完全正相关。
 
 在实际应用中，为了计算相关性，通常使用统计软件或编程语言的库函数，如Python的NumPy中的`corrcoef`函数。
@@ -492,6 +495,4 @@ print("Edges:", best_model.edges())
 ![image-20230920012005110](./bayesian_network/image-20230920012005110.png)
 
 ![image-20230920012036085](./bayesian_network/image-20230920012036085.png)
-
-### Practical - 03
 
