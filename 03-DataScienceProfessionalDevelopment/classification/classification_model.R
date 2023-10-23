@@ -5,187 +5,63 @@ library(caret)
 library(randomForest)
 library(e1071)
 
+# ================ import data set
 # 导入数据集
-melb_house_data <- read.csv("melb_house_withnum.csv", header = TRUE)
-# head(melb_house_data)
+melb_house_data <- read.csv("df_selected.csv", header = TRUE)
 
-# 去除缺失值
-melb_house_data_cleaned <- na.omit(melb_house_data)
+# Get the column name of the non-numeric column
+non_numeric_cols <- sapply(melb_house_data, is.character)
 
-# 去除一些列
-melb_house_data_cleaned <- melb_house_data_cleaned[ , !(names(melb_house_data_cleaned) %in% c("ADDRESS", "SELLERG", "METHOD", "DATE", "COUNCILARE", "BUILDINGAR", "YEARBUILT", "LATTITUDE", "LONGTITUDE", "PROPERTYCO", "SUBURB"))]
+# Convert non-numeric columns to factors
+melb_house_data[non_numeric_cols] <- lapply(melb_house_data[non_numeric_cols], as.factor)
 
+# Use str() function to verify the result
+str(melb_house_data)
 
-# 计算IQR
-Q1 <- quantile(melb_house_data_cleaned$PRICE, 0.25)
-Q3 <- quantile(melb_house_data_cleaned$PRICE, 0.75)
-IQR <- Q3 - Q1
-
-# 定义上下界
-lower_bound <- Q1 - 1.5 * IQR
-upper_bound <- Q3 + 1.5 * IQR
-
-# 根据上下界过滤数据
-melb_house_data_cleaned <- melb_house_data_cleaned[melb_house_data_cleaned$PRICE >= lower_bound & melb_house_data_cleaned$PRICE <= upper_bound, ]
-
-
-
-# 检测price的分布情况
-# 将PRICE分成10w的区间
-bins <- seq(0, max(melb_house_data_cleaned$PRICE) + 100000, by=100000)
-price_intervals <- cut(melb_house_data_cleaned$PRICE, breaks=bins, right=FALSE)
-
-# 计算每个区间的频数
-price_counts <- table(price_intervals)
-
-
-# 根据新的区间划分price_interval
-breaks <- c(1e+05, 2e+05, 3e+05, 4e+05, 5e+05, 6e+05, 7e+05, 8e+05, 9e+05, 1e+06, 1.1e+06, 1.6e+06, 2.1e+06, 2.4e+06)
-
-labels <- c("[1e+05, 2e+05)", "[2e+05, 3e+05)", "[3e+05, 4e+05)", "[4e+05, 5e+05)", "[5e+05, 6e+05)",
-            "[6e+05, 7e+05)", "[7e+05, 8e+05)", "[8e+05, 9e+05)", "[9e+05, 1e+06)", "[1e+06, 1.1e+06)",
-            "[1.1e+06, 1.6e+06)", "[1.6e+06, 2.1e+06)", "[2.1e+06, 2.4e+06)")
-
-melb_house_data_cleaned$price_interval <- cut(melb_house_data_cleaned$PRICE, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)
-
-
-# 定义5公里的区间断点
-bins_distance <- seq(0, 50, by=5)  # 0到50公里，每5公里一个区间
-
-# 使用cut()函数将DISTANCE转换为5公里的区间
-distance_intervals <- cut(melb_house_data_cleaned$DISTANCE, breaks=bins_distance, right=FALSE)
-
-# 将计算出的距离区间添加到数据框作为新列
-melb_house_data_cleaned$distance_interval <- distance_intervals
-
-
-
-# 设置随机数生成种子，以确保可复现的结果
+# ================= RANDOM FOREST TREE
+# 设置随机数种子以确保结果可重现
 set.seed(123)
 
-# 计算训练数据的大小
-train_size <- floor(0.7 * nrow(melb_house_data_cleaned))
+# 找出数据集中的分类变量
+categorical_cols <- sapply(melb_house_data, is.factor)
 
-# 随机抽取70%的索引作为训练数据
-train_indices <- sample(seq_len(nrow(melb_house_data_cleaned)), size = train_size)
+# 将分类变量独立出来
+categorical_data <- melb_house_data[, categorical_cols]
 
-# 根据上述索引创建训练数据和测试数据
-train_data <- melb_house_data_cleaned[train_indices, ]
-test_data <- melb_house_data_cleaned[-train_indices, ]
+# 使用model.matrix对分类变量进行独热编码
+encoded_categorical_data <- model.matrix(~ ., data = categorical_data)
 
-# 从train_data和test_data中移除PRICE和DISTANCE列
-train_data$PRICE <- NULL
-train_data$DISTANCE <- NULL
+# 合并编码后的分类变量和原始数据集，但不包括目标变量
+encoded_melb_house_data <- cbind(melb_house_data[, !categorical_cols], encoded_categorical_data)
 
-test_data$PRICE <- NULL
-test_data$DISTANCE <- NULL
-
-
-# ==============================================================================
-#  决策树模型
-model_tree <- rpart(price_interval ~ ., data=train_data, method="class")
-
-print(model_tree)
+# 选择特征和目标变量
+features_encoded <- encoded_melb_house_data[, -which(names(encoded_melb_house_data) == "PRICE_INTERVAL")]
+target_encoded <- encoded_melb_house_data$PRICE_INTERVAL
 
 
-importance <- model_tree$variable.importance
-print(importance)
+# 创建随机森林模型
+model1 <- randomForest(target ~ ., data = encoded_melb_house_data , ntree = 100, mtry = 3)
+model2 <- randomForest(target ~ ., data = encoded_melb_house_data , ntree = 200, mtry = 4)
+model3 <- randomForest(target ~ ., data = encoded_melb_house_data , ntree = 300, mtry = 5)
 
+# 导入混淆矩阵函数
+library(caret)
 
+# 定义评估函数
+evaluate_model <- function(model, data) {
+  predictions <- predict(model, data)
+  confusion_matrix <- confusionMatrix(predictions, data$PRICE_INTERVAL)
+  return(confusion_matrix)
+}
 
-# 定义交叉验证的控制参数
-ctrl <- trainControl(method="cv", number=10)  # 10-fold cross-validation
+# 评估不同参数组合的模型性能
+evaluation1 <- evaluate_model(model1, encoded_melb_house_data )
+evaluation2 <- evaluate_model(model2, encoded_melb_house_data )
+evaluation3 <- evaluate_model(model3, encoded_melb_house_data )
 
-# 使用caret的train()函数训练模型并进行交叉验证
-model_ctrl <- train(price_interval ~ ., data=train_data, method="rpart", trControl=ctrl)
-
-# 查看模型详情
-print(model_ctrl)
-
-
-# 使用最佳cp值训练决策树
-best_cp <- 0.01181767
-final_tree_model <- rpart(price_interval ~ ., data=train_data, method="class", cp=best_cp)
-
-# 打印训练好的决策树模型的摘要
-print(final_tree_model)
-
-
-# 使用测试数据进行预测
-predictions <- predict(final_tree_model, newdata = test_data, type = "class")
-
-# 计算混淆矩阵
-confusion_matrix <- confusionMatrix(predictions, test_data$price_interval)
-
-# 输出混淆矩阵
-print(confusion_matrix)
-
-# 提取各项性能指标
-accuracy <- confusion_matrix$overall["Accuracy"]
-precision <- confusion_matrix$byClass["Precision"]
-recall <- confusion_matrix$byClass["Recall"]
-f1_score <- confusion_matrix$byClass["F1"]
-
-
-# ==============================================================================
-# 设置随机种子以保证结果可重复
-set.seed(123)
-
-melb_house_data_cleaned_2 <- melb_house_data_cleaned[ , !(names(melb_house_data_cleaned) %in% c("ADDRESS", "SELLERG", "METHOD", "DATE", "COUNCILARE", "BUILDINGAR", "YEARBUILT", "LATTITUDE", "LONGTITUDE", "PROPERTYCO"))]
-melb_house_data_cleaned_2 <- melb_house_data_cleaned_2[melb_house_data_cleaned_2$PRICE >= lower_bound & melb_house_data_cleaned$PRICE <= upper_bound, ]
-
-
-
-# 根据新的区间划分price_interval
-breaks <- c(1e+05, 2e+05, 3e+05, 4e+05, 5e+05, 6e+05, 7e+05, 8e+05, 9e+05, 1e+06, 1.1e+06, 1.6e+06, 2.1e+06, 2.4e+06)
-
-labels <- c("[1e+05, 2e+05)", "[2e+05, 3e+05)", "[3e+05, 4e+05)", "[4e+05, 5e+05)", "[5e+05, 6e+05)",
-            "[6e+05, 7e+05)", "[7e+05, 8e+05)", "[8e+05, 9e+05)", "[9e+05, 1e+06)", "[1e+06, 1.1e+06)",
-            "[1.1e+06, 1.6e+06)", "[1.6e+06, 2.1e+06)", "[2.1e+06, 2.4e+06)")
-
-melb_house_data_cleaned_2$price_interval <- cut(melb_house_data_cleaned_2$PRICE, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)
-
-
-# 计算训练数据的大小
-train_size <- floor(0.7 * nrow(melb_house_data_cleaned_2))
-
-# 随机抽取70%的索引作为训练数据
-train_indices <- sample(seq_len(nrow(melb_house_data_cleaned_2)), size = train_size)
-
-# 根据上述索引创建训练数据和测试数据
-train_data <- melb_house_data_cleaned_2[train_indices, ]
-test_data <- melb_house_data_cleaned_2[-train_indices, ]
-
-# 假设你的因变量是train_data$PriceRange，自变量是train_data的其他列
-# ntree表示随机森林中的决策树数量，可以根据需要进行调整
-# mtry表示每棵决策树中用于分割的特征数量，也可以根据需要进行调整
-rf_model <- randomForest(price_interval ~ ., data = train_data, ntree = 100, mtry = 3)
-
-# 查看随机森林模型的摘要信息
-print(rf_model)
-
-
-
-# ======== 朴素贝叶斯 ======
-# 选择输入特征和目标变量
-input_features <- c("ROOMS", "TYPE", "DISTANCE", "POSTCODE", "BEDROOM2", "BATHROOM", "CAR", "LANDSIZE", "REGIONNAME", "AREANUM")
-target_variable <- "price_interval"
-
-# 使用naiveBayes函数训练模型
-nb_model <- naiveBayes(train_data[, input_features], train_data[, target_variable])
-
-saveRDS(nb_model, "naive_bayes_model.rds")
-
-
-# 选择测试数据集的输入特征和目标变量
-test_input_features <- c("ROOMS", "TYPE", "DISTANCE", "POSTCODE", "BEDROOM2", "BATHROOM", "CAR", "LANDSIZE", "REGIONNAME", "AREANUM")
-test_target_variable <- "price_interval"
-
-# 进行预测
-predictions <- predict(nb_model, newdata = test_data[, test_input_features])
-
-# 创建混淆矩阵
-confusion_matrix <- table(predictions, test_data[, test_target_variable])
-
-# 计算准确性
-accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+# 查看模型1的性能
+evaluation1
+# 查看模型2的性能
+evaluation2
+# 查看模型3的性能
+evaluation3
