@@ -76,7 +76,7 @@ In conclusion, Twitter's real-time tweet analysis system illustrates the challen
 
 A Geographical Information System (GIS) is a sophisticated tool designed to collect, store, analyze, manage, and present geographic data. This technology encompasses a combination of hardware, software, and data systems, allowing for the acquisition and interpretation of geospatial information. GIS plays a pivotal role in multiple fields by enabling the understanding and visualization of geographic patterns, relationships, and trends (Long, 2008).
 
-## In what fields is geographical information system used in reality?
+## In what fields is geographical information system used in reality
 
 The real-world applications of GIS are diverse and extensive, touching upon various sectors. In urban planning, GIS facilitates the management of land use, transportation systems, infrastructure, and zoning regulations (Carver, 2003). Environmental management benefits from GIS in tracking and overseeing natural resources, environmental changes, and the evaluation of human impacts on the environment (Liu, 2013). Disaster management relies on GIS for preparedness, response, and recovery efforts, including hazard mapping, vulnerability assessments, and emergency coordination (ESRI, 2020).
 
