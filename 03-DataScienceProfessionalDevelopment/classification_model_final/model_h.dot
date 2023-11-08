@@ -1,0 +1,2 @@
+digraph G {
+graph [dpi=500];node [fontsize=12, shape=ellipse, width=0.5, height=0.5];

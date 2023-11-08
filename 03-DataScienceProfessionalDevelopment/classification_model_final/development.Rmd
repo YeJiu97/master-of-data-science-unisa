@@ -1,0 +1,512 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+# DEVELOPMENT
+
+```{r}
+data <- read.csv("/Users/pei-yiliu/Desktop/paggie/master year2_semester1/Development/melb_housing_filtered3.csv")
+data <- data.frame(data)
+
+head(data)
+
+```
+
+```{r}
+names(data)
+str(data)
+```
+
+```{r}
+# Select specific columns to convert to factors and then to numeric
+columns_to_convert <- c("SUBURB", "ADDRESS", "TYPE", "METHOD", "SELLERG", "DATE", "COUNCILARE", "REGIONNAME")
+
+for (col in columns_to_convert) {
+  new_col_name <- paste0(col, "_num")
+  data[[new_col_name]] <- as.numeric(factor(data[[col]]))
+}
+
+# Print the resulting data frame
+head(data, 10)
+
+```
+
+This code is converting specific columns in a data frame from categorical (character) data to factors and then to numeric data, making the data suitable for various types of statistical analyses and data exploration.
+
+```{r}
+str(data)
+```
+
+The session provided displays the variable and its transformed versions, first as a factor and then as a numeric variable. We can observe a clear correspondence between categorical values and their corresponding numeric representations.
+
+```{r}
+s_data <- data[, c("SUBURB", "SUBURB_num")]
+
+unique(s_data)
+
+```
+
+```{r}
+
+# Select and display only two columns
+t_data <- data[, c("TYPE", "TYPE_num")]
+
+unique(t_data)
+```
+
+```{r}
+
+# Select and display only two columns
+m_data <- data[, c("METHOD", "METHOD_num")]
+
+unique(m_data)
+```
+
+```{r}
+# Select and display only two columns
+sg_data <- data[, c("SELLERG", "SELLERG_num")]
+
+unique(sg_data)
+```
+
+```{r}
+
+# Select and display only two columns
+ca_data <- data[, c("COUNCILARE", "COUNCILARE_num")]
+
+unique(ca_data)
+```
+
+```{r}
+# Select and display only two columns
+r_data <- data[, c("REGIONNAME", "REGIONNAME_num")]
+
+unique(r_data)
+```
+
+```{r}
+library(dplyr)
+
+# Convert the "Date" column to a Date object
+data$Date <- as.Date(data$DATE, format = "%d/%m/%Y")
+data <- na.omit(data)
+# Convert the "Date" column to a numeric representation (number of days)
+data$DateNumeric <- as.numeric(data$Date)
+```
+
+```{r}
+library(bnlearn)
+library(pcalg)
+```
+
+```{r}
+
+# Select columns with numeric or integer values
+numeric_vars <- names(data)[sapply(data, is.numeric) | sapply(data, is.integer)]
+
+# Access data from the selected columns
+num_data <- data[numeric_vars]
+```
+
+```{r}
+
+# Extract only the numeric columns from the data frame
+num_data <- data[, numeric_vars]
+
+# Convert the entire num_data data frame to numeric
+num_data <- as.data.frame(lapply(num_data, as.numeric))
+
+# Check for missing values in the numeric variables
+missing_values <- sapply(num_data, function(x) any(is.na(x)))
+```
+
+```{r}
+# Perform structure learning
+if (require(pcalg)) {
+  pc.fit <- pc(suffStat = list(C = cor(num_data), n = nrow(num_data)),
+               indepTest = gaussCItest, alpha = 0.01, labels = colnames(num_data))
+
+  # Plot the estimated graph
+  if (require(Rgraphviz)) {
+    plot(pc.fit, main = "Estimated graph")
+  }
+}
+```
+
+this diagram performs structure learning for a Bayesian network using the PC algorithm. It calculates conditional independence relationships based on the provided data, and then, it generates a visual representation of the estimated Bayesian network structure. This visual representation is a graphical model that shows how variables are connected and dependent on each other in a probabilistic manner.
+
+The "PC" algorithm, short for "Peter and Clark," is a widely used algorithm for performing constraint-based structure learning in Bayesian networks. Specifically, it's used for identifying the presence or absence of conditional dependencies between variables, which is crucial for determining the structure of a Bayesian network. Here's what "PC" stands for in the context of this algorithm:
+
+**Peter:** Refers to the work of Peter Spirtes, who is one of the authors of the PC algorithm. He, along with other researchers, contributed to the development of this method. **Clark:** Represents the work of Clark Glymour, another prominent figure in the development of the algorithm. He, too, played a significant role in its formulation.
+
+The PC algorithm works by examining the statistical relationships between variables in the dataset. It systematically explores conditional independence relationships to learn the structure of a Bayesian network. By applying statistical tests for conditional independence, such as the chi-squared test or the Gaussian conditional independence test for continuous data, the PC algorithm identifies which variables are directly connected and which are not. This information is used to build the graph structure of the Bayesian network.
+
+The PC algorithm is part of the broader field of causal discovery and graphical modeling, and it's valuable for modeling complex systems and making predictions or inferences about the relationships between variables.
+
+```{r}
+options(scipen = 999)
+
+# Initialize a data frame to store causal effects
+results <- data.frame()
+data_no_price <- num_data[, -which(names(num_data) == "PRICE")]
+
+# Iterate through other genes and estimate causal effects
+for (colname in names(data_no_price)) {
+  if (colname != "PRICE") { 
+    causal_effect <- min(abs(idaFast(match(colname,names(num_data)), match("PRICE",names(num_data)),
+                                     cov(num_data), pc.fit@graph)))
+    
+    # Store the absolute value of the causal effect
+    gene_result <-data.frame(variable=colname,causality=causal_effect)
+    
+    # Add the gene and its absolute causal effect to the data frame
+   results<- rbind(results, gene_result)
+   print(paste(gene_result)) } }
+
+# Rank genes based on the absolute values of their causal effects
+top_10 <- results[order(-results$causality), ]
+
+
+# Print the top 10 genes with strong causal effects on EBF1
+#print("Top 10 genes with strong causal effects on EBF1:",top_10_genes)
+# Print the top 10 genes with strong causal effects on EBF1
+cat("Top 10 genes with strong causal effects on EBF1:\n")
+print(top_10)
+```
+
+The session conducts causal effect estimation for each predictor variable (gene) with respect to the "PRICE" variable and then ranks these variables based on the strength of their causal effects. The top 10 variables with the strongest causal effects on "PRICE" are printed as the final output.
+
+The top 10 casuality variables and their estimated causal effects on property prices, along with the numerical values, have been ranked. "ROOMS" has the most substantial effect with a value of 337,614.20, suggesting that the number of rooms significantly influences prices. "BEDROOM2" and "CAR" follow closely with causal effects of 37,224.54 and 33,548.25, respectively. "REGIONNAME_num" and "METHOD_num" also exhibit strong effects, impacting prices noticeably with values of 30,558.44 and 27,584.56, respectively. The "COUNCILARE_num" variable has a substantial effect of 4,664.23, while "AREANUM," "POSTCODE," and "DATE_num" play a moderately influential role with effects of 2,568.93, 1,766.57, and 1,608.15, respectively. "SELLERG_num" has the least effect with a value of 134.45. These findings provide valuable insights into the factors affecting property prices in the dataset.
+
+# Bayesian Network modeling
+
+In our current analysis, we will adopted Bayesian Network modeling as a powerful tool to examine the intricate relationships surrounding the variable "price_by_area." The focal point of our investigation lies in identifying the nodes, both parents and children, that constitute the Markov blanket of "price_by_area." The Markov blanket encompasses a set of variables that, when known, renders "price_by_area" conditionally independent of all other variables in the network. By scrutinizing these related nodes, we aim to unveil the dependencies and influences that play a crucial role in determining the price of a particular entity, whether it be a product, a property, or any other relevant context. This endeavor enables us to gain valuable insights into the factors that affect "price_by_area" and helps us build a comprehensive understanding of the underlying dynamics in our Bayesian Network model.
+
+In the context of data analysis, where the "TYPE" variable encompasses three distinct categories -- "townhouse", "unit", and "house:, a thoughtful approach is essential. Notably, in the case of units or apartments, it's reasonable to assume that they may lack individual building area data, as they typically share a common structure. To account for this variation, the dataset is strategically partitioned into three subsets based on the"TYPE" category. In doing so, a specialized focus on the "house", "unit", and "townhouse" category emerges, with the creation of a subset called "num_h", "num_u", and "num_t" to investigate its unique characteristics.
+
+This segmentation allows us to delve deeper into the data, exploring the potential relationships and dependencies within each category. The subsequent application of the Markov Blanket analysis, as exemplified by the code snippet, offers valuable insights into the conditional dependencies between the "price_by_area" variable and other relevant variables specific to specific properties, shedding light on the intricate dynamics of this particular data subset.
+
+Indeed, by segmenting the dataset into three distinct subsets based on the categories of "house," "unit," and "townhouse," we are able to tailor our analysis to the unique characteristics and intricacies of each property type. This division of the dataset enables a more focused examination of the specific factors and dependencies that impact properties within each category. Such a structured approach provides a clearer understanding of the underlying data, making it easier to draw meaningful insights and conclusions for each property type.
+
+```{r}
+num_h <- num_data[num_data$TYPE_num == 1, ]
+MB_h <- learn.mb(data.frame(num_h),"price_by_area"
+                  ,method = "iamb", alpha = 0.05)
+MB_h
+length(MB_h)
+```
+
+Based on the results obtained from the Markov Blanket analysis, we have identified 14 variables that exhibit relationships with the "price_by_area" variable. These variables can be considered as either parents or children nodes in the context of the Bayesian network model. These 14 variables are: "DISTANCE," "POSTCODE," "LANDSIZE," "COUNCILARE_num," "BATHROOM," "LATTITUDE," "CAR," "DateNumeric," "YEARBUILT," "BEDROOM2," "AREANUM," "BUILDINGAR," "REGIONNAME_num," and "LONGTITUDE."
+
+The presence of these variables in the Markov Blanket suggests that they have a conditional dependency with "price_by_area." In other words, knowing the values of these variables can provide valuable information for predicting or understanding the price of properties in the "house" category. These insights can be leveraged for further data analysis, modeling, or decision-making related to "price_by_area" in the context of unit properties.
+
+```{r}
+h_data <- num_h[, names(num_h) %in% MB_h]
+h_data <- mutate(h_data, PRICE = num_h$PRICE, price_by_area = num_h$price_by_area)
+head(h_data,5)
+```
+
+```{r}
+num_u <- num_data[num_data$TYPE_num == 3, ]
+MB_u <- learn.mb(data.frame(num_u),"price_by_area"
+                  ,method = "iamb", alpha = 0.05)
+MB_u
+length(MB_u)
+```
+
+Based on the results obtained from the Markov Blanket analysis for the "price_by_area" variable within the "unit" category, we have identified 11 variables that exhibit relationships with "price_by_area" in this specific context. These 11 variables can be considered as either parents or children nodes in the context of the Bayesian network model for "price_by_area" in the "unit" category. These variables are: "BUILDINGAR," "ROOMS," "POSTCODE," "DISTANCE," "SUBURB_num," "DateNumeric," "BATHROOM," "REGIONNAME_num," "LATTITUDE," "METHOD_num," and "YEARBUILT."
+
+The presence of these variables in the Markov Blanket suggests that they have a conditional dependency with "price_by_area" within the "unit" category. Knowing the values of these variables is valuable for understanding or predicting the price of unit properties within this specific category. These insights can be leveraged for further data analysis, modeling, or decision-making specific to "price_by_area" for unit properties.
+
+```{r}
+u_data <- num_u[, names(num_u) %in% MB_u]
+u_data <- mutate(u_data, PRICE = num_u$PRICE, price_by_area = num_u$price_by_area)
+head(u_data,5)
+```
+
+```{r}
+num_t <- num_data[num_data$TYPE_num == 2, ]
+MB_t <- learn.mb(data.frame(num_t),"price_by_area"
+                  ,method = "iamb", alpha = 0.05)
+MB_t
+length(MB_t)
+```
+
+Based on the results obtained from the Markov Blanket analysis for the "price_by_range" variable within the "townhouse" category, we have identified 5 variables that exhibit relationships with "price_by_range" in this specific context. These 5 variables can be considered as either parents or children nodes in the context of the Bayesian network model for "price_by_range" in the "townhouse" category. These variables are: "DISTANCE," "LANDSIZE," "POSTCODE," "LATTITUDE," and "REGIONNAME_num."
+
+The presence of these variables in the Markov Blanket suggests that they have a conditional dependency with "price_by_range" within the "townhouse" category. Knowing the values of these variables is valuable for understanding or predicting the price range of townhouse properties within this specific category. These insights can be leveraged for further data analysis, modeling, or decision-making specific to "price_by_range" for townhouse properties.
+
+```{r}
+t_data <- num_t[, names(num_t) %in% MB_t]
+t_data <- mutate(t_data, PRICE = num_t$PRICE, price_by_area = num_t$price_by_area)
+head(t_data,5)
+```
+
+```{r}
+
+#####new
+# Function to clean and discretize columns
+clean_and_discretize <- function(data, num_bins) {
+  # Iterate through all columns in the data frame
+  for (col in names(data)) {
+    # Check if the column is numeric
+    if (is.numeric(data[[col]])) {
+      # If it's numeric, discretize it
+      data <- data %>% mutate(across(all_of(col), ~ cut(., breaks = num_bins, labels = FALSE), .names = "discrete_{.col}"))
+    } else {
+      # If it's not numeric, attempt to clean it and convert to numeric
+      data[[col]] <- as.numeric(gsub("[^0-9.]", "", data[[col]]))
+      if (!any(is.na(data[[col]]))) {
+        # If the column is successfully converted to numeric, discretize it
+        data <- data %>% mutate(across(all_of(col), ~ cut(., breaks = num_bins, labels = FALSE), .names = "discrete_{.col}"))
+      }
+    }
+  }
+  return(data)
+}
+
+# Define the number of bins
+num_bins <- 5
+
+# Clean and discretize the h_data DataFrame
+h_data_discrete <- clean_and_discretize(h_data, num_bins)
+
+# Clean and discretize the u_data DataFrame
+u_data_discrete <- clean_and_discretize(u_data, num_bins)
+
+# Clean and discretize the t_data DataFrame
+t_data_discrete <- clean_and_discretize(t_data, num_bins)
+
+```
+
+the code streamlines the data cleaning and discretization process for "house," "unit," and "townhouse" datasets, allowing for a structured and uniform format that is essential for meaningful insights and robust analysis, especially when dealing with datasets that encompass a mix of numeric and non-numeric data types.
+
+Discretizing data into a limited number of bins, offers several valuable benefits. Firstly, it simplifies the data, making it more manageable and interpretable. The reduction in the number of unique values can lead to models that are easier to understand, particularly when working with non-technical audiences. By categorizing data into distinct bins, patterns and relationships within the data become more apparent, enhancing interpretability.
+
+Secondly, discretization allows for the capturing of nonlinear relationships in the data. Certain machine learning algorithms perform more effectively with discrete, categorical features, enabling them to detect intricate patterns and dependencies that might be challenging to uncover when working with continuous data.
+
+```{r}
+# List of data frames
+data_frames <- list(h_data_discrete, u_data_discrete, t_data_discrete)
+
+# Function to convert columns to factors and keep only the "discrete_" columns
+convert_to_factors_and_keep <- function(data_frame) {
+  discrete_columns <- grep("^discrete_", names(data_frame), value = TRUE)
+  data_frame <- data_frame[discrete_columns]
+  data_frame <- lapply(data_frame, as.factor)
+  data_frame <- as.data.frame(data_frame)
+  return(data_frame)
+}
+
+# Apply the function to each data frame
+data_frames <- lapply(data_frames, convert_to_factors_and_keep)
+
+# Assign the modified data frames back to their original variables
+h_data_discrete <- data_frames[[1]]
+u_data_discrete <- data_frames[[2]]
+t_data_discrete <- data_frames[[3]]
+
+# Check if they are data frames
+is.data.frame(h_data_discrete)
+is.data.frame(u_data_discrete)
+is.data.frame(t_data_discrete)
+
+
+```
+
+```{r}
+
+
+# Perform structure learning and parameter learning
+structure_h <- hc(h_data_discrete)
+model_h <- bn.fit(structure_h, data = h_data_discrete, method = "mle")
+
+structure_u <- hc(u_data_discrete)
+model_u <- bn.fit(structure_u, data = u_data_discrete, method = "mle")
+
+structure_t <- hc(t_data_discrete)
+model_t <- bn.fit(structure_t, data = t_data_discrete, method = "mle")
+
+# Print the Bayesian network models
+print(model_h)
+print(model_u)
+print(model_t)
+
+```
+
+A Bayesian Network (BN) is a probabilistic graphical model that represents a set of variables and their conditional dependencies using a directed acyclic graph. In a BN, nodes in the graph represent variables, and directed edges between nodes indicate probabilistic dependencies. Each node is associated with a conditional probability distribution that quantifies how the node's value depends on the values of its parent nodes. BNs are widely used for modeling uncertain and complex systems, making predictions, and performing probabilistic reasoning.
+
+```{r}
+# Plot the Bayesian network model
+
+# Customize the font size for node names
+#graph.par(fontsize = 25)  # Adjust the font size as needed
+#graphviz.plot(structure)
+
+# Customize the appearance of the graph
+graph.par(
+  node.width = 2,      # Adjust the width of the nodes as needed
+  node.height = 1.5,   # Adjust the height of the nodes as needed
+  fontsize = 250        # Adjust the font size of node names
+)
+
+# Plot the Bayesian network with custom attributes
+graphviz.plot(structure_h,fontsize=20)
+
+
+```
+
+
+
+```{r}
+
+graphviz.plot(structure_h)
+graphviz.plot(structure_u)
+graphviz.plot(structure_t)
+
+```
+
+
+```{r}
+# Perform structure learning and parameter learning
+structure_h <- hc(h_data_discrete)
+model_h <- bn.fit(structure_h, data = h_data_discrete, method = "mle")
+
+structure_u <- hc(u_data_discrete)
+model_u <- bn.fit(structure_u, data = u_data_discrete, method = "mle")
+
+structure_t <- hc(t_data_discrete)
+model_t <- bn.fit(structure_t, data = t_data_discrete, method = "mle")
+
+# Save Bayesian network models as PNG images
+png("model_h1.png", width = 1200, height = 1000, res=1000)  # Adjust width and height as needed
+graphviz.plot(structure_h)
+dev.off()
+
+png("model_u1.png", width = 1200, height = 1000, res=1000)  # Adjust width and height as needed
+graphviz.plot(structure_u)
+dev.off()
+
+png("model_t1.png", width = 1200, height = 1000, res=1000)  # Adjust width and height as needed
+graphviz.plot(structure_t)
+dev.off()
+```
+
+The code operates on three separate Bayesian network structures that have been previously learned using the Hill-Climbing algorithm for the three datasets: structure_h (for "house"), structure_u (for "unit"), and structure_t (for "townhouse"). These structures represent the graphical representation of the dependencies and relationships between variables within each dataset.
+
+```{r}
+######correct and new one
+
+# Load required libraries
+library(bnlearn)
+library(caret)
+
+# List of data frames
+data_frames <- list(h_data_discrete, u_data_discrete, t_data_discrete)
+
+# Initialize a list to store the Bayesian network models and accuracies
+models <- list()
+accuracies <- numeric(length(data_frames))
+
+# Set a seed for reproducibility
+set.seed(123)
+
+suppressWarnings({
+
+# Loop through the data frames
+for (i in 1:length(data_frames)) {
+    # Step 1: Split your data into training and testing datasets
+    split_ratio <- 0.7  # Adjust the ratio as needed
+    n <- nrow(data_frames[[i]])
+    train_indices <- sample(1:n, round(split_ratio * n))
+    training_data <- data_frames[[i]][train_indices, ]
+    testing_data <- data_frames[[i]][-train_indices, ]
+    
+    # Step 2: Ensure consistent levels for all discrete variables
+    discrete_vars <- grep("^discrete_", names(training_data), value = TRUE)
+    for (var in discrete_vars) {
+        levels_in_training_data <- levels(training_data[[var]])
+        levels_in_model <- levels(data_frames[[i]][[var]])
+        
+        # Ensure levels are consistent and set levels in training data to match the model's levels
+        levels_to_set <- union(levels_in_training_data, levels_in_model)
+        training_data[[var]] <- factor(training_data[[var]], levels = levels_to_set)
+    }
+    
+    # Step 3: Train the Bayesian network on the training dataset
+    structure <- hc(training_data)  # Use a structure learning method (e.g., Hill-Climbing)
+    model <- bn.fit(structure, data = training_data, method = "mle")  # Parameter learning
+    
+    # Store the model in the models list
+    models[[i]] <- model
+    
+    # Step 4: Use the trained network to make predictions on the testing dataset
+    predicted_probabilities <- predict(model, node = "discrete_PRICE", data = testing_data)
+    
+    # Step 5: Calculate evaluation metrics (e.g., accuracy)
+    actual_outcomes <- testing_data$discrete_PRICE
+    
+    # Calculate accuracy
+    confusion_matrix <- confusionMatrix(predicted_probabilities, actual_outcomes)
+    accuracy <- confusion_matrix$overall["Accuracy"]
+    accuracies[i] <- accuracy
+    
+    # Print the accuracy or other evaluation metrics
+    cat("Model for data frame ", i, " - Accuracy:", accuracy, "\n")
+    
+    # Assign the model to the corresponding variable
+    if (i == 1) {
+        model_h <- model
+    } else if (i == 2) {
+        model_u <- model
+    } else if (i == 3) {
+        model_t <- model
+    }
+}
+
+    # Code that generates warnings
+    # ...
+})
+# Print the Bayesian network models
+cat("Model for h_data_discrete:\n")
+print(model_h)
+cat("Model for u_data_discrete:\n")
+print(model_u)
+cat("Model for t_data_discrete:\n")
+print(model_t)
+
+# Print accuracies for each data frame
+cat("Accuracy for h_data_discrete:", accuracies[1], "\n")
+cat("Accuracy for u_data_discrete:", accuracies[2], "\n")
+cat("Accuracy for t_data_discrete:", accuracies[3], "\n")
+
+
+```
+
+This session is designed to train and evaluate Bayesian network models for three distinct data frames: h_data_discrete, u_data_discrete, and t_data_discrete, with the aim of assessing their predictive accuracy for the "discrete_PRICE" variable. The process unfolds in several key steps.
+
+Firstly, for each data frame, the data is divided into training and testing datasets. This split is configured with a default ratio of 70% for training and 30% for testing but can be adjusted as needed to suit the specific modeling requirements.
+
+To ensure the integrity of the modeling process, the code checks and enforces consistent levels (or categories) for the discrete variables in both the training data and the model's data. This step is vital to prevent inconsistencies that could disrupt the modeling process.
+
+Subsequently, the Bayesian network model is trained on the training dataset. The structure learning phase employs the Hill-Climbing algorithm, which constructs the Bayesian network structure. It's worth noting that alternative structure learning methods could be substituted if preferred.
+
+Following structure learning, the code proceeds with parameter learning using the Maximum Likelihood Estimation (MLE) technique. This step involves estimating the parameters of the Bayesian network model based on the training data.
+
+The trained Bayesian network models are stored in a list named "models" for future reference and utilization. With the models prepared, predictions are generated for the "discrete_PRICE" variable on the testing dataset.
+
+To gauge the effectiveness of these predictions, the code calculates accuracy by comparing the predicted outcomes with the actual outcomes in the testing data. This is accomplished using the "confusionMatrix" function from the "caret" package, providing a robust evaluation metric.
+
+In summary, this session executes the training and evaluation of Bayesian network models on distinct housing types. The models' performance is assessed through the accuracy of their predictions, revealing insights into their suitability for predicting property prices within each housing category.
+
+The code successfully trains Bayesian network models for houses, units, and townhouses and evaluates their accuracy in predicting property prices. The accuracy results are as follows:
+
+-   **Model for h_data_discrete: Accuracy:** 0.8624382
+-   **Model for u_data_discrete: Accuracy:** 0.7287736
+-   **Model for t_data_discrete: Accuracy:** 0.6374269
+
+These accuracy values reflect the performance of the Bayesian network models for each housing type. The highest accuracy is achieved for houses, followed by units and townhouses. This information can guide decision-making and predictions in real-world applications based on the type of property being considered.
