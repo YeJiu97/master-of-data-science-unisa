@@ -1,0 +1,31 @@
+Attached are some examples of drawings we produce using different software.
+
+Revit:
+
+    Drawing: 236-020-STR-001-D is a General Arrangement drawing of a Silo, Silo support structure and platforms. 
+
+Advance Steel:
+
+    A-C1-01_0 it is a Welded Assembly drawing of a support column. It’s an assembly because it has welded parts to it. Shows all welding details
+    S-M1030-01_0 is a single part drawing, showing the detail of the same column shown in Assembly A-C1-01 but just the detail fo that main column without the welded parts
+    S-F1399-01_0 is a single drawing of the detail of cleat plate. However, it has a problem. In this drawing the software missed to put the centre lines in the holes and did not put the diameter, of the holes or how many holes. 
+
+Inventor:
+
+    236-020-WAS-120_1 shows a general welded assembly drawing of a Silo Ring Beam, including all weld details and dimensions to each of the parts that are going to be welded. 
+
+Also, from sheet 5 onwards you will find that it has all the single drawings of the parts that make this assembly with all relevant dimensions, holes details, etc.
+
+    236-020-SAS-120_0 shows a bolted assembly of a hatch. This type of drawing is joining together 3 welded assemblies. So, it just shows how this welded assemblies are going to be bolted together. 
+
+General differences in between software:
+
+    Title block, the titles blocks for the drawings differ from each other depending on the software we use.
+    Type of drawing:
+        Revit will show general arrangements drawings, footing details, sections from platforms,  general details of connections. It will join different big assemblies into 1 general arrangement drawing. It is easier to use for this purpose.
+        Revit generally we will not show single parts details. AS inventor and Advance Steel will.
+        Revit will have a general BOM (Build of materials), the others will have a specific BOM on the drawing and balloons indicating each part.
+
+Priority one will be that the software you are designing goes through the drawings, checking what our checklist attached is checking for.
+
+Priority two will be checking the tittle block of each software, for spelling mistakes and missing information.
