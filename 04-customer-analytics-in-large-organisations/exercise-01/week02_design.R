@@ -83,6 +83,10 @@ des1 <- rotation.design(attribute.names = list(Region = c("Reg_A", "Reg_B", "Reg
 
 questionnaire(choice.experiment.design = des1)
 
+
+
+
+
 data("syn.res1")
 syn.res1[1:3, ]
 
@@ -106,9 +110,10 @@ clogout1
 
 gofm(clogout1)
 
-# Calculating the marginal willingness to pay
-mwtp(output = clogout1, monetary.variables = c("Price"),
-     nonmonetary.variables = c("Reg_B", "Reg_C", "More", "Most", "More:F", "Most:F"), 
+
+# 使用 mwtp 函数计算边际意愿支付
+mwtp(output = clogout1, monetary.variables = c("Price"), 
+     nonmonetary.variables = c("Reg_B", "Reg_C", "More", "Most", "More:Most"),
      confidence.level = 0.90, seed = 987)
 
 
