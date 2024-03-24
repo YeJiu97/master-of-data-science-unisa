@@ -34,19 +34,43 @@ cleaned_numeric_data <- na.omit(selected_numeric_data)
 str(cleaned_numeric_data)
 
 
-# ============== Doing analysis =====================================
-## ============= 转换为二进制 =================
-# 将自变量转换为二进制的0和1值
-binary_data <- cleaned_numeric_data %>%
-  mutate(
-    age_under_40 = ifelse(`12. Your age:` == 1, 1, 0),
-    age_40_to_59 = ifelse(`12. Your age:` == 2, 1, 0),
-    age_60_or_older = ifelse(`12. Your age:` == 3, 1, 0)
-  ) %>%
-  select(-`12. Your age:`)
 
-# 查看转换后的数据集结构
-str(binary_data)
+# =================================
 
-
-
+# library(dplyr)
+# library(tidyr)
+# 
+# # 假设 selected_data 是包含描述性选择的数据框
+# 
+# # 转换描述性数据为适合分析的格式
+# selected_data_processed <- selected_data %>%
+#   # 使用mutate和str_extract从每个描述性选择中提取信息
+#   mutate(
+#     Cuisine_Type = case_when(
+#       grepl("American Cuisine", `1. Please select your preferred choice from the options provided below:`) ~ "American",
+#       grepl("Asian Cuisine", `1. Please select your preferred choice from the options provided below:`) ~ "Asian",
+#       grepl("European Cuisine", `1. Please select your preferred choice from the options provided below:`) ~ "European",
+#       TRUE ~ NA_character_
+#     ),
+#     Distance = case_when(
+#       grepl("Long Drive Distance", `1. Please select your preferred choice from the options provided below:`) ~ "Long",
+#       grepl("Short Drive Distance", `1. Please select your preferred choice from the options provided below:`) ~ "Short",
+#       grepl("Walking Distance", `1. Please select your preferred choice from the options provided below:`) ~ "Walking",
+#       TRUE ~ NA_character_
+#     ),
+#     Dining_Type = case_when(
+#       grepl("delivery", `1. Please select your preferred choice from the options provided below:`) ~ "Delivery",
+#       grepl("dining-in", `1. Please select your preferred choice from the options provided below:`) ~ "DiningIn",
+#       grepl("take-away", `1. Please select your preferred choice from the options provided below:`) ~ "TakeAway",
+#       TRUE ~ NA_character_
+#     ),
+#     Price = as.numeric(gsub(".*Price : \\$(\\d+).*", "\\1", `1. Please select your preferred choice from the options provided below:`))
+#   ) %>%
+#   # 删除原始的描述性列
+#   select(-`1. Please select your preferred choice from the options provided below:`) %>%
+#   # 转换为哑变量
+#   mutate(across(c(Cuisine_Type, Distance, Dining_Type), as.factor)) %>%
+#   dummy_cols(select_columns = c("Cuisine_Type", "Distance", "Dining_Type"))
+# 
+# # 检查处理后的数据
+# str(selected_data_processed)
