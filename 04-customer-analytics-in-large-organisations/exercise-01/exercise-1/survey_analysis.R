@@ -75,8 +75,12 @@ library(survival)
 clogout1 <- clogit(RES ~ ASC + Asian.Cuisine + European.Cuisine + delivery + dining.in + 
                      # delivery:gender + delivery:type + dining.in:gender + dining.in:type +
                      Price + strata(STR), 
-                   data = dataset1,
-                   iter.max= 100)
+                   data = dataset1)
+
+
+clogout1
+
+gofm(clogout1)
 
 
 # 定义一个函数来实现条件 logistic 回归
