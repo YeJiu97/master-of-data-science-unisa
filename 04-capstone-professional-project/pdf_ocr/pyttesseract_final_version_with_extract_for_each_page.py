@@ -4,6 +4,7 @@ import pytesseract
 
 # Specify the installation path of Tesseract for Windows users
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+poppler_path = r"C:\poppler-24.02.0\Library\bin"
 
 # Path to your PDF document
 pdf_path = r'pdf_files\236-020-STR-001_D.pdf' # Update this to your actual PDF file path  # Update this to your actual PDF file path
